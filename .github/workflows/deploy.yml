@@ -5,38 +5,44 @@
 
 name: Deploy to GitHub Pages
 
-# === Khi nào pipeline chạy? ===
+# Chạy khi push lên nhánh main
+# Hoặc chạy thủ công từ tab Actions
 on:
   push:
-    branches: [main]       # Chạy khi push lên nhánh main
-  workflow_dispatch:        # Cho phép chạy thủ công từ GitHub UI
+    branches:
+      - main
+  workflow_dispatch:
 
-# === Các job trong pipeline ===
+# Cho phép GitHub Actions ghi dữ liệu vào repository
+# Cần quyền này để push code sang branch gh-pages
+permissions:
+  contents: write
+
 jobs:
-  # Job 1: Build & Deploy
   build-and-deploy:
-    runs-on: ubuntu-latest   # Chạy trên máy ảo Ubuntu (free)
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code từ GitHub
+      # Bước 1: Lấy source code từ repository
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Step 2: Kiểm tra HTML cơ bản
+      # Bước 2: Kiểm tra file index.html
       - name: Validate HTML
         run: |
           echo "Checking index.html exists..."
+
           if [ -f "index.html" ]; then
             echo "index.html found!"
             echo "File size: $(wc -c < index.html) bytes"
           else
-            echo " index.html NOT found!"
+            echo "index.html NOT found!"
             exit 1
           fi
 
-      # Step 3: Deploy lên GitHub Pages
+      # Bước 3: Deploy website lên branch gh-pages
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
